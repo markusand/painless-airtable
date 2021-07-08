@@ -58,12 +58,15 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 	};
 
 	const select = async (table, options = {}) => {
-		const { persist, expand } = options;
+		const { index, persist, expand } = options;
 		const { records = [], offset } = await query(table, options);
-		const current = records.map(flattenRecord);
+		const current = index ? records.reduce((acc, record) => {
+			acc[record.id] = flattenRecord(record);
+			return acc;
+		}, {}) : records.map(flattenRecord);
 		if (expand) await expandRecords(current, expand);
 		const next = offset && persist ? await select(table, { ...options, offset }) : [];
-		return [...current, ...next];
+		return index ? { ...current, ...next } : [...current, ...next];
 	};
 
 	const find = async (table, id, options = {}) => {

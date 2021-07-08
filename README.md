@@ -37,6 +37,7 @@ const results = await airtable.select('users', {
 |max|int|undefined|Max number of results|
 |sort|object|undefined|Fields and order to sort the results|
 |persist|boolean|false|Automatically query for more results when max-results-per-query limit is reached. Be aware it may trigger the max-query-per-second limit error |
+|index|boolean|false|Return an an object of indexed records by RECORD_ID()|
 |where|object, string|undefined|Options to filter results|
 |expand|object|undefined|Options to expand linked records|
 
