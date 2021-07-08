@@ -1,6 +1,6 @@
 {
-  "name": "airtable-client",
-  "version": "0.1.0",
+  "name": "painless-airtable",
+  "version": "0.0.0",
   "description": "Interact easier with the Airtable API",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -11,13 +11,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/markusand/airtable-client"
+    "url": "https://github.com/markusand/painless-airtable"
   },
   "keywords": [
     "javascript",
     "airtable",
     "api",
-    "client"
+    "painless"
   ],
   "author": "Marc Vilella",
   "license": "MIT",

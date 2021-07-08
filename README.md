@@ -1,15 +1,15 @@
-# Airtable Client
+# Painless Airtable
 
 Easily interact with the Airtable API.
 
 ## Usage
 
 ```bash
-npm install airtable-client
+npm install painless-airtable
 ```
 
 ```js
-import { useAirtable } from 'airtable-client';
+import { useAirtable } from 'painless-airtable';
 
 const { AIRTABLE_TOKEN } = import.meta.env;
 
