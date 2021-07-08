@@ -15,12 +15,13 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 	const expandRecords = async (records, expand) => Promise.all(
 		Object.entries(expand).map(async ([field, { table, options }]) => {
 			const ids = [...new Set(records.flatMap(record => record[field]))];
-			const byId = `OR(${ids.map(id => `RECORD_ID()='${id}'`).join(', ')})`;
+			const byId = `OR(${ids.map(id => `RECORD_ID()='${id}'`).join(',')})`;
 			// eslint-disable-next-line no-use-before-define
-			const expanded = await select(`${table}?filterByFormula=${byId}`, options);
-			records.forEach(record => {
-				record[field] = expanded.filter(({ _id }) => record[field]?.includes(_id));
+			const expanded = await select(`${table}?filterByFormula=${byId}`, {
+				...options,
+				indexed: true,
 			});
+			records.forEach(record => { record[field] = record[field]?.map(id => expanded[id]); });
 		}),
 	);
 
