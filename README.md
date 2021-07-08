@@ -2,6 +2,11 @@
 
 Easily interact with the Airtable API.
 
+[![version](https://img.shields.io/npm/v/painless-airtable)](https://npmjs.org/package/painless-airtable)
+[![size](https://img.shields.io/bundlephobia/minzip/painless-airtable)](https://bundlephobia.com/package/painless-airtable)
+![build](https://github.com/markusand/painless-airtable/actions/workflows/publish.yaml/badge.svg)
+![license](https://img.shields.io/npm/l/painless-airtable)
+
 ## Usage
 
 ```bash
