@@ -1,0 +1,35 @@
+{
+  "name": "airtable-client",
+  "version": "0.1.0",
+  "description": "Interact easier with the Airtable API",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markusand/airtable-client"
+  },
+  "keywords": [
+    "javascript",
+    "airtable",
+    "api",
+    "client"
+  ],
+  "author": "Marc Vilella",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "eslint": "^7.30.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "rollup": "^2.52.8",
+    "rollup-plugin-terser": "^7.0.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
