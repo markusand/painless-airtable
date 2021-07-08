@@ -26,8 +26,8 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 	);
 
 	const buildURL = (resource, options) => {
-		const { fields = [], sort = {}, max, view, offset, where } = options;
-		const url = new URL(`${baseURL}/${base}/${resource}`);
+		const { base: overrideBase, fields = [], sort = {}, max, view, offset, where } = options;
+		const url = new URL(`${baseURL}/${overrideBase || base}/${resource}`);
 
 		// Add direct parameters (if required)
 		if (view) url.searchParams.append('view', view);

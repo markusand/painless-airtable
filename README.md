@@ -32,6 +32,7 @@ const results = await airtable.select('users', {
 
 |option|type|default|description|
 |---|---|---|---|
+|base|string|undefined|Override the global base|
 |view|string|undefined|Get results from a specific view|
 |fields|array|undefined|Fields to retrieve|
 |max|int|undefined|Max number of results|
