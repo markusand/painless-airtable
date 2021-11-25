@@ -1,13 +1,14 @@
-const OPERANDS = { $eq: '=', $neq: '!=', $lt: '<', $gt: '>', $lte: '<=', $gte: '>=' };
+const OPERANDS = { $eq: '=', $neq: '!=', $lt: '<', $gt: '>', $lte: '<=', $gte: '>=', is: '=' };
 
 const FILTERS = {
 	has: (field, value) => `FIND('${value}',{${field}})`,
+	not: (_, value) => `NOT(${value})`,
 	checked: (field, value) => `{${field}}=${+value}`,
 	default: (field, value, operand) => `{${field}}${OPERANDS[operand]}'${value}'`,
 };
 
-const serialize = (item, callback, aggregator = 'OR') => (Array.isArray(item)
-	? `${aggregator}(${item.map(value => callback(value)).join(',')})`
+const serialize = (item, callback) => (Array.isArray(item)
+	? `OR(${item.map(value => callback(value)).join(',')})`
 	: callback(item));
 
 const parse = (field, item) => {
@@ -15,8 +16,8 @@ const parse = (field, item) => {
 	if (typeof item === 'object') {
 		const [operand, value] = Object.entries(item)[0];
 		const filter = FILTERS[operand] || FILTERS.default;
-		const aggregator = operand === 'not' ? 'AND' : 'OR';
-		return serialize(value, v => filter(field, v, operand), aggregator);
+		const composed = operand === 'not' ? parse(field, value) : value;
+		return serialize(composed, v => filter(field, v, operand));
 	}
 	return FILTERS.default(field, item, '$eq');
 };

@@ -57,6 +57,9 @@ where: {
   age: [20, 25, 30], // Field is ANY of the values
   age: { $lt: 35 },  // Apply an operand to the value
   age: [20, { $gte: 50 }], // Combine options
+  is_valid: { checked: true },
+  tags: { has: 'development' },
+  type: { not: ['post', 'page'] },
 }
 ```
 
