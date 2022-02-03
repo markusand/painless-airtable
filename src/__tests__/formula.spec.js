@@ -1,4 +1,4 @@
-import createFormula from './formula';
+import createFormula from '../formula';
 
 describe('formula for where clause', () => {
 	it('should return null if no input parameter', () => {

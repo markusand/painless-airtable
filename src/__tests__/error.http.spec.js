@@ -1,7 +1,7 @@
-import HttpError from './error.http';
+import HttpError from '../error.http';
 
 describe('error class HttpError', () => {
-	it('error should have valid attributes', () => {
+	it('should have valid attributes', () => {
 		expect.assertions(3);
 		const error = new HttpError(404, 'Not Found');
 		expect(error.name).toBe('HttpError');
