@@ -19,7 +19,7 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 			// eslint-disable-next-line no-use-before-define
 			const expanded = await select(`${table}?filterByFormula=${byId}`, {
 				...options,
-				indexed: true,
+				index: true,
 			});
 			records.forEach(record => { record[field] = record[field]?.map(id => expanded[id]); });
 		}),
