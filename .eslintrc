@@ -2,11 +2,14 @@
   "root": true,
   "env": {
     "es6": true,
-    "browser": true
+    "browser": true,
+		"jest/globals": true
   },
+	"plugins": ["jest"],
   "extends": [
     "airbnb-base",
-    "eslint:recommended"
+    "eslint:recommended",
+		"plugin:jest/all"
   ],
   "parserOptions": {
     "ecmaVersion": 2021,
