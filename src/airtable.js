@@ -3,7 +3,9 @@ import createFormula from './formula';
 
 const BASE_URL = 'https://api.airtable.com/v0';
 
-export default ({ base, token, baseURL = BASE_URL }) => {
+export default ({ base, token, baseURL = BASE_URL } = {}) => {
+	if (!base) throw new Error('Airtable base is required');
+	if (!token) throw new Error('Airtable API token is required');
 	const CONFIG = { headers: { Authorization: `Bearer ${token}` } };
 
 	const flattenRecord = record => ({
@@ -25,7 +27,8 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 		}),
 	);
 
-	const buildURL = (resource, options) => {
+	const buildURL = (resource, options = {}) => {
+		if (!resource) throw new Error('Airtable resource is required');
 		const { base: overrideBase, fields = [], sort = {}, max, view, offset, where } = options;
 		const url = new URL(`${baseURL}/${overrideBase || base}/${resource}`);
 
@@ -51,6 +54,7 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 	};
 
 	const query = async (resource, options = {}) => {
+		if (!resource) throw new Error('Airtable resource is required');
 		const url = buildURL(resource, options);
 		const response = await fetch(url.toString(), CONFIG);
 		const { status, statusText } = response;
@@ -59,6 +63,7 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 	};
 
 	const select = async (table, options = {}) => {
+		if (!table) throw new Error('Airtable table is required');
 		const { index, persist, expand } = options;
 		const { records = [], offset } = await query(table, options);
 		const current = index ? records.reduce((acc, record) => {
@@ -71,6 +76,8 @@ export default ({ base, token, baseURL = BASE_URL }) => {
 	};
 
 	const find = async (table, id, options = {}) => {
+		if (!table) throw new Error('Airtable table is required');
+		if (!id) throw new Error('Airtable record id is required');
 		const record = await query(`${table}/${id}`, options);
 		return flattenRecord(record);
 	};
