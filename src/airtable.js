@@ -14,6 +14,12 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 		...record.fields,
 	});
 
+	const flattenRecords = (records, index) => (
+		index
+			? records.reduce((acc, record) => ({ ...acc, [record.id]: flattenRecord(record) }), {})
+			: records.map(flattenRecord)
+	);
+
 	const expandRecords = async (records, expand) => {
 		if (!expand) return records;
 		// Recollect all unique record IDs for each field and query them to the API
@@ -79,13 +85,10 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 		if (!table) throw new Error('Airtable table is required');
 		const { index, persist, expand } = options;
 		const { records = [], offset } = await query(table, options);
-		const expanded = await expandRecords(records, expand);
-		const current = index ? expanded.reduce((acc, record) => {
-			acc[record.id] = flattenRecord(record);
-			return acc;
-		}, {}) : expanded.map(flattenRecord);
-		const next = offset && persist ? await select(table, { ...options, offset }) : [];
-		return index ? { ...current, ...next } : [...current, ...next];
+		const more = offset && persist ? await select(table, { ...options, offset }) : [];
+		const all = [...records, ...more];
+		const expanded = await expandRecords(all, expand);
+		return flattenRecords(expanded, index);
 	};
 
 	const find = async (table, id, options = {}) => {
