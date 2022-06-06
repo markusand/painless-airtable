@@ -14,18 +14,31 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 		...record.fields,
 	});
 
-	const expandRecords = async (records, expand) => Promise.all(
-		Object.entries(expand).map(async ([field, { table, options }]) => {
-			const ids = [...new Set(records.flatMap(record => record[field]))];
-			const byId = `OR(${ids.map(id => `RECORD_ID()='${id}'`).join(',')})`;
+	const expandRecords = async (records, expand) => {
+		if (!expand) return records;
+		// Recollect all unique record IDs for each field and query them to the API
+		const queries = Object.entries(expand).map(async ([field, { table, options }]) => {
+			const ids = records.flatMap(record => record.fields[field]);
+			const unique = [...new Set(ids)].map(id => `RECORD_ID()='${id}'`).join(',');
+			const url = `${table}?filterByFormula=OR(${unique})`;
 			// eslint-disable-next-line no-use-before-define
-			const expanded = await select(`${table}?filterByFormula=${byId}`, {
-				...options,
-				index: true,
-			});
-			records.forEach(record => { record[field] = record[field]?.map(id => expanded[id]); });
-		}),
-	);
+			const expanded = await select(url, { ...options, index: true });
+			return { field, expanded };
+		});
+		// Wait for all queries to complete
+		const expandable = await Promise.all(queries);
+		// Replace expandable IDs with their expanded records
+		return records.map(({ fields, ...rest }) => ({
+			...rest,
+			fields: {
+				...fields,
+				...expandable.reduce((acc, { field, expanded }) => {
+					if (fields[field]) acc[field] = fields[field].map(id => expanded[id]);
+					return acc;
+				}, {}),
+			},
+		}));
+	};
 
 	const buildURL = (resource, options = {}) => {
 		if (!resource) throw new Error('Airtable resource is required');
@@ -66,11 +79,11 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 		if (!table) throw new Error('Airtable table is required');
 		const { index, persist, expand } = options;
 		const { records = [], offset } = await query(table, options);
-		const current = index ? records.reduce((acc, record) => {
+		const expanded = await expandRecords(records, expand);
+		const current = index ? expanded.reduce((acc, record) => {
 			acc[record.id] = flattenRecord(record);
 			return acc;
-		}, {}) : records.map(flattenRecord);
-		if (expand) await expandRecords(current, expand);
+		}, {}) : expanded.map(flattenRecord);
 		const next = offset && persist ? await select(table, { ...options, offset }) : [];
 		return index ? { ...current, ...next } : [...current, ...next];
 	};
