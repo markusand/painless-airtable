@@ -83,12 +83,14 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 
 	const select = async (table, options = {}) => {
 		if (!table) throw new Error('Airtable table is required');
-		const { index, persist, expand } = options;
+		const { index, persist, expand, flatten = true, ...rest } = options;
 		const { records = [], offset } = await query(table, options);
-		const more = offset && persist ? await select(table, { ...options, offset }) : [];
+		const more = offset && persist
+			? await select(table, { ...rest, persist, flatten: false, offset })
+			: [];
 		const all = [...records, ...more];
 		const expanded = await expandRecords(all, expand);
-		return flattenRecords(expanded, index);
+		return flatten ? flattenRecords(expanded, index) : expanded;
 	};
 
 	const find = async (table, id, options = {}) => {

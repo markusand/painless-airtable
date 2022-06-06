@@ -185,18 +185,21 @@ describe('useAirtable select', () => {
 		expect(response[0].kids[0].kids[0].name).toBe('John Doe III');
 	});
 
-	it('should persist paginated queries', async () => {
-		expect.assertions(2);
+	// Test indexed queries as it's a more complex case that can lead to errors
+	it('should persist paginated indexed queries', async () => {
+		expect.assertions(3);
 
 		fetch.resetMocks();
 		fetch
 			.once(JSON.stringify({ records: [{ id: 'ID_1', fields: { name: 'John Doe' } }], offset: 'OFFSET' }))
-			.once(JSON.stringify({ records: [{ id: 'ID_2', fields: { name: 'Jane Doe' } }] }));
+			.once(JSON.stringify({ records: [{ id: 'ID_2', fields: { name: 'Jane Doe' } }], offset: 'OFFSET' }))
+			.once(JSON.stringify({ records: [{ id: 'ID_3', fields: { name: 'Jon Smith' } }] }));
 
-		const response = await airtable.select('TABLE', { persist: true });
+		const response = await airtable.select('TABLE', { index: true, persist: true });
 
-		expect(fetch.mock.calls).toHaveLength(2);
-		expect(response).toHaveLength(2);
+		expect(fetch.mock.calls).toHaveLength(3);
+		expect(Object.keys(response)).toHaveLength(3);
+		expect(Object.keys(response)[2]).toBe('ID_3');
 	});
 });
 
