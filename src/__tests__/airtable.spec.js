@@ -25,6 +25,14 @@ describe('initialize useAirtable service', () => {
 	});
 });
 
+describe('useAirtable query', () => {
+	it('should throw error if resource not provided', async () => {
+		expect.assertions(1);
+		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
+		await expect(airtable.query()).rejects.toThrow('Airtable resource is required');
+	});
+});
+
 describe('useAirtable select', () => {
 	const airtable = useAirtable({ base: 'BASE', token: 'TOKEN', baseURL: 'https://baseurl' });
 

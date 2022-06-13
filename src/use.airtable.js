@@ -7,14 +7,14 @@ const BASE_URL = 'https://api.airtable.com/v0';
 export default ({ base, token, baseURL = BASE_URL } = {}) => {
 	if (!base) throw new Error('Airtable base is required');
 	if (!token) throw new Error('Airtable API token is required');
-	const CONFIG = { headers: { Authorization: `Bearer ${token}` } };
 
 	const buildURL = useURL({ baseURL, base });
 
 	const query = async (resource, options = {}) => {
 		if (!resource) throw new Error('Airtable resource is required');
 		const url = buildURL(resource, options);
-		const response = await fetch(url.toString(), CONFIG);
+		const headers = { Authorization: `Bearer ${token}` };
+		const response = await fetch(url.toString(), { headers });
 		const { status, statusText } = response;
 		if (HttpError.isErrorCode(status)) throw new HttpError(status, statusText);
 		return response.json();
