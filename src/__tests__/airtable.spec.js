@@ -1,6 +1,6 @@
 /* eslint jest/require-hook: "off" */
 import fetch from 'jest-fetch-mock';
-import useAirtable from '../airtable';
+import useAirtable from '../use.airtable';
 
 fetch.enableMocks();
 
