@@ -4,7 +4,7 @@ export const flattenRecord = record => ({
 	...record.fields,
 });
 
-export const useRecords = (dirtyRecords = [], select, options) => {
+export const useRecords = (dirtyRecords = [], select, options = {}) => {
 	let records = dirtyRecords;
 
 	const flatten = () => {
