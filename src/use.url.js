@@ -23,5 +23,5 @@ export default ({ baseURL, base }) => (resource, options = {}) => {
 	const formula = createFormula(where);
 	if (formula) url.searchParams.append('filterByFormula', formula);
 
-	return url;
+	return url.toString();
 };
