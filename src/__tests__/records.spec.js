@@ -30,8 +30,7 @@ describe('useRecord', () => {
 
 	it('should flatten all records by default', () => {
 		expect.assertions(3);
-		const select = jest.fn();
-		const { getAll } = useRecords(RECORDS, select);
+		const { getAll } = useRecords(RECORDS);
 		const records = getAll();
 		expect(records).toHaveLength(2);
 		expect(records[0]).toHaveProperty('_id', 'ID_1');
@@ -40,8 +39,7 @@ describe('useRecord', () => {
 
 	it('should not flatten records when disabled', () => {
 		expect.assertions(3);
-		const select = jest.fn();
-		const { getAll } = useRecords(RECORDS, select, { flatten: false });
+		const { getAll } = useRecords(RECORDS, { flatten: false });
 		const records = getAll();
 		expect(records).toHaveLength(2);
 		expect(records[0]).toHaveProperty('id', 'ID_1');
@@ -50,16 +48,14 @@ describe('useRecord', () => {
 
 	it('should index records', () => {
 		expect.assertions(1);
-		const select = jest.fn();
-		const { getAll } = useRecords(RECORDS, select, { index: true });
+		const { getAll } = useRecords(RECORDS, { index: true });
 		const indexes = Object.keys(getAll());
 		expect(indexes).toStrictEqual(['ID_1', 'ID_2']);
 	});
 
 	it('should index not flattened records', () => {
 		expect.assertions(1);
-		const select = jest.fn();
-		const { getAll } = useRecords(RECORDS, select, { index: true, flatten: false });
+		const { getAll } = useRecords(RECORDS, { index: true, flatten: false });
 		const indexes = Object.keys(getAll());
 		expect(indexes).toStrictEqual(['ID_1', 'ID_2']);
 	});
@@ -67,8 +63,8 @@ describe('useRecord', () => {
 	it('should persist paginated queries', async () => {
 		expect.assertions(10);
 		const select = jest.fn(async () => [{ id: 'ID_3', fields: { name: 'John Doe Jr.', kids: [] } }]);
-		const { persist, getAll } = useRecords(RECORDS, select, { persist: true });
-		await persist('table', 'offset');
+		const { persist, getAll } = useRecords(RECORDS, { persist: true });
+		await persist('table', 'offset', select);
 		expect(select.mock.calls).toHaveLength(1);
 		expect(select.mock.calls[0][0]).toBe('table');
 		expect(select.mock.calls[0][1]).toHaveProperty('offset', 'offset');
@@ -85,8 +81,8 @@ describe('useRecord', () => {
 	it('should not persist queries when disabled', async () => {
 		expect.assertions(2);
 		const select = jest.fn();
-		const { persist, getAll } = useRecords(RECORDS, select, { persist: false });
-		await persist('table', 'offset');
+		const { persist, getAll } = useRecords(RECORDS, { persist: false });
+		await persist('table', 'offset', select);
 		expect(select.mock.calls).toHaveLength(0);
 		const records = getAll();
 		expect(records).toHaveLength(2);
@@ -95,8 +91,8 @@ describe('useRecord', () => {
 	it('should expand linked records', async () => {
 		expect.assertions(6);
 		const select = jest.fn(async () => ({ ID_3: { id: 'ID_3', fields: { name: 'John Doe Jr.', kids: [] } } }));
-		const { expand, getAll } = useRecords(RECORDS, select, { expand: { kids: { table: 'kids' } } });
-		await expand();
+		const { expand, getAll } = useRecords(RECORDS, { expand: { kids: { table: 'kids' } } });
+		await expand(select);
 		expect(select.mock.calls).toHaveLength(1);
 		expect(select.mock.calls[0][1]).toHaveProperty('index', true);
 		const records = getAll();
@@ -109,8 +105,8 @@ describe('useRecord', () => {
 	it('should not expand records when disabled', async () => {
 		expect.assertions(3);
 		const select = jest.fn();
-		const records = useRecords(RECORDS, select, { expand: false });
-		await records.expand();
+		const records = useRecords(RECORDS, { expand: false });
+		await records.expand(select);
 		const response = records.getAll();
 		expect(select.mock.calls).toHaveLength(0);
 		expect(response[0].kids).toHaveLength(1);

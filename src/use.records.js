@@ -10,17 +10,17 @@ export const indexRecords = records => records.reduce((acc, record) => {
 	return acc;
 }, {});
 
-export const useRecords = (dirtyRecords = [], select, options = {}) => {
+export const useRecords = (dirtyRecords = [], options = {}) => {
 	let records = dirtyRecords;
 
-	const persist = async (table, offset) => {
+	const persist = async (table, offset, select) => {
 		if (!options.persist || !offset) return;
 		const forceRaw = { flatten: false, expand: false, index: false };
 		const more = await select(table, { ...options, offset, ...forceRaw });
 		records = [...records, ...more];
 	};
 
-	const expand = async () => {
+	const expand = async select => {
 		if (!options.expand) return;
 		// Recollect all unique record IDs for each field and query them to the API
 		const queries = Object.entries(options.expand).map(async ([field, expander]) => {
