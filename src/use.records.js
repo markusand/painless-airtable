@@ -4,16 +4,14 @@ export const flattenRecord = record => ({
 	...record.fields,
 });
 
+export const indexRecords = records => records.reduce((acc, record) => {
+	const id = record._id || record.id; // eslint-disable-line no-underscore-dangle
+	acc[id] = record;
+	return acc;
+}, {});
+
 export const useRecords = (dirtyRecords = [], select, options = {}) => {
 	let records = dirtyRecords;
-
-	const flatten = () => {
-		// Flatten when options.flatten is true, undefined or null
-		if (!(options.flatten ?? true)) return;
-		records = options.index
-			? records.reduce((acc, record) => ({ ...acc, [record.id]: flattenRecord(record) }), {})
-			: records.map(flattenRecord);
-	};
 
 	const persist = async (table, offset) => {
 		if (!options.persist || !offset) return;
@@ -45,7 +43,11 @@ export const useRecords = (dirtyRecords = [], select, options = {}) => {
 		});
 	};
 
-	const getAll = () => records;
+	const getAll = () => {
+		const { index, flatten = true } = options;
+		const flatRecords = flatten ? records.map(flattenRecord) : records;
+		return index ? indexRecords(flatRecords) : flatRecords;
+	};
 
-	return { flattenRecord, flatten, expand, persist, getAll };
+	return { flattenRecord, expand, persist, getAll };
 };

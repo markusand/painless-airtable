@@ -28,11 +28,10 @@ describe('useRecord', () => {
 		expect(getAll()).toHaveLength(0);
 	});
 
-	it('should flatten all records', () => {
+	it('should flatten all records by default', () => {
 		expect.assertions(3);
 		const select = jest.fn();
-		const { flatten, getAll } = useRecords(RECORDS, select);
-		flatten();
+		const { getAll } = useRecords(RECORDS, select);
 		const records = getAll();
 		expect(records).toHaveLength(2);
 		expect(records[0]).toHaveProperty('_id', 'ID_1');
@@ -42,19 +41,25 @@ describe('useRecord', () => {
 	it('should not flatten records when disabled', () => {
 		expect.assertions(3);
 		const select = jest.fn();
-		const { flatten, getAll } = useRecords(RECORDS, select, { flatten: false });
-		flatten();
+		const { getAll } = useRecords(RECORDS, select, { flatten: false });
 		const records = getAll();
 		expect(records).toHaveLength(2);
 		expect(records[0]).toHaveProperty('id', 'ID_1');
 		expect(records[1]).toHaveProperty('id', 'ID_2');
 	});
 
-	it('should index flattened records', () => {
+	it('should index records', () => {
 		expect.assertions(1);
 		const select = jest.fn();
-		const { flatten, getAll } = useRecords(RECORDS, select, { index: true });
-		flatten();
+		const { getAll } = useRecords(RECORDS, select, { index: true });
+		const indexes = Object.keys(getAll());
+		expect(indexes).toStrictEqual(['ID_1', 'ID_2']);
+	});
+
+	it('should index not flattened records', () => {
+		expect.assertions(1);
+		const select = jest.fn();
+		const { getAll } = useRecords(RECORDS, select, { index: true, flatten: false });
 		const indexes = Object.keys(getAll());
 		expect(indexes).toStrictEqual(['ID_1', 'ID_2']);
 	});
@@ -73,8 +78,8 @@ describe('useRecord', () => {
 		expect(select.mock.calls[0][1]).toHaveProperty('index', false);
 		const records = getAll();
 		expect(records).toHaveLength(3);
-		expect(records[0]).toHaveProperty('id', 'ID_1');
-		expect(records[2]).toHaveProperty('id', 'ID_3');
+		expect(records[0]).toHaveProperty('_id', 'ID_1');
+		expect(records[2]).toHaveProperty('_id', 'ID_3');
 	});
 
 	it('should not persist queries when disabled', async () => {
@@ -90,11 +95,10 @@ describe('useRecord', () => {
 	it('should expand linked records', async () => {
 		expect.assertions(6);
 		const select = jest.fn(async () => ({ ID_3: { id: 'ID_3', fields: { name: 'John Doe Jr.', kids: [] } } }));
-		const { expand, flatten, getAll } = useRecords(RECORDS, select, { expand: { kids: { table: 'kids' } } });
+		const { expand, getAll } = useRecords(RECORDS, select, { expand: { kids: { table: 'kids' } } });
 		await expand();
 		expect(select.mock.calls).toHaveLength(1);
 		expect(select.mock.calls[0][1]).toHaveProperty('index', true);
-		flatten();
 		const records = getAll();
 		expect(records[0].kids).toHaveLength(1);
 		expect(records[0].kids[0]).toHaveProperty('id', 'ID_3');
@@ -109,7 +113,7 @@ describe('useRecord', () => {
 		await records.expand();
 		const response = records.getAll();
 		expect(select.mock.calls).toHaveLength(0);
-		expect(response[0].fields.kids).toHaveLength(1);
-		expect(response[0].fields.kids[0]).toBe('ID_3');
+		expect(response[0].kids).toHaveLength(1);
+		expect(response[0].kids[0]).toBe('ID_3');
 	});
 });

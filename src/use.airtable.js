@@ -27,7 +27,6 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 		// Each method determines internally if action must be performed
 		await records.persist(table, response.offset);
 		await records.expand();
-		records.flatten();
 		return records.getAll();
 	};
 
