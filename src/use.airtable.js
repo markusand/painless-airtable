@@ -22,12 +22,11 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 
 	const select = async (table, options = {}) => {
 		if (!table) throw new Error('Airtable table is required');
-		const response = await query(table, options);
-		const records = useRecords(response.records, options);
-		// Each method determines internally if action must be performed
-		await records.persist(table, response.offset, select);
-		await records.expand(select);
-		return records.getAll();
+		const { records, offset } = await query(table, options);
+		const { persist, expand, getAll } = useRecords(records, options);
+		await persist(table, offset, select);
+		await expand(select);
+		return getAll();
 	};
 
 	const find = async (table, id, options = {}) => {
