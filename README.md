@@ -46,6 +46,7 @@ const results = await airtable.select('users', {
 |index|boolean|false|Return an an object of indexed records by RECORD_ID()|
 |where|object, string|undefined|Options to filter results|
 |expand|object|undefined|Options to expand linked records|
+|flatten|boolean|true|Flatten records, assigning metadata to underscore fields|
 
 ### where
 
