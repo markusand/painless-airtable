@@ -1,13 +1,13 @@
 {
   "name": "painless-airtable",
-  "version": "0.2.3",
-  "description": "Interact easier with the Airtable API",
+  "version": "0.2.4",
+  "description": "Easily interact with the Airtable API",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "browser": "dist/index.umd.js",
   "scripts": {
     "test": "jest --coverage",
-    "build": "rollup -c",
+    "build": "npm run test && rollup -c",
     "dev": "rollup -c -w",
     "prepare": "npm run build"
   },
