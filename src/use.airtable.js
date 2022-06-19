@@ -16,7 +16,10 @@ export default ({ base, token, baseURL = BASE_URL } = {}) => {
 		const headers = { Authorization: `Bearer ${token}` };
 		const response = await fetch(url.toString(), { headers });
 		const { status, statusText } = response;
-		if (HttpError.isErrorCode(status)) throw new HttpError(status, statusText);
+		if (HttpError.isErrorCode(status)) {
+			const errorMessage = `Error with resource '${resource}': ${status} ${statusText}`;
+			throw new HttpError(status, errorMessage);
+		}
 		return response.json();
 	};
 
