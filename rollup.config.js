@@ -8,9 +8,10 @@ export default [
 	{
 		input: 'src/main.js',
 		output: {
-			name: 'airtable-client',
+			name: 'painlessairtable',
 			file: pkg.browser,
 			format: 'umd',
+			exports: 'auto',
 		},
 		plugins: [resolve(), commonjs(), terser()],
 	},

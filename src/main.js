@@ -1,4 +1,6 @@
 import useAirtable from './use.airtable';
 import createFormula from './formula';
 
-export { useAirtable, createFormula };
+const init = useAirtable;
+
+export { init, useAirtable, createFormula };
