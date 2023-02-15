@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": true,
+    "target": "ES2019",
+		"declaration": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+		"paths": {
+      "/@/*": ["./src/*"]
+    },
+  },
+  "include": ["./src/**/*"],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
+}

@@ -1,13 +1,14 @@
 import createFormula from './formula';
+import { AirtableSelectOptions } from './types';
 
-export default ({ baseURL, base }) => (resource, options = {}) => {
+export default (baseURL: string, base: string) => (resource: string, options?: AirtableSelectOptions): string => {
 	if (!resource) throw new Error('Airtable resource is required');
-	const { base: overrideBase, fields = [], sort = {}, max, view, offset, where } = options;
+	const { base: overrideBase, fields = [], sort = {}, max, view, offset, where } = options || {};
 	const url = new URL(`${baseURL}/${overrideBase || base}/${resource}`);
 
 	// Add direct parameters (if required)
 	if (view) url.searchParams.append('view', view);
-	if (max) url.searchParams.append('maxRecords', max);
+	if (max) url.searchParams.append('maxRecords', `${max}`);
 	if (offset) url.searchParams.append('offset', offset);
 
 	// Serialize fields[] option
@@ -20,8 +21,7 @@ export default ({ baseURL, base }) => (resource, options = {}) => {
 	});
 
 	// Build filter formula
-	const formula = createFormula(where);
-	if (formula) url.searchParams.append('filterByFormula', formula);
+	if (where) url.searchParams.append('filterByFormula', createFormula(where));
 
 	return url.toString();
 };
