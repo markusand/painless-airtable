@@ -46,6 +46,7 @@ describe('useAirtable query', () => {
 		expect(fetch.mock.calls).toHaveLength(1);
 		const [[url, options]] = fetch.mock.calls;
 		expect(url).toBe(`${BASE_URL}/BASE/TABLE`);
+		// @ts-ignore Headers contains Authorization
 		expect(options?.headers?.Authorization).toBe('Bearer TOKEN');
 		expect(result).toStrictEqual({ records: [] });
 	});
@@ -54,8 +55,8 @@ describe('useAirtable query', () => {
 		expect.assertions(2);
 		fetch.resetMocks();
 		fetch
-			.once(undefined, { status: 404, statusText: 'Not Found' })
-			.once(undefined, { status: 500, statusText: 'Internal error' });
+			.once('', { status: 404, statusText: 'Not Found' })
+			.once('', { status: 500, statusText: 'Internal error' });
 		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
 		await expect(airtable.query('TABLE')).rejects.toThrow("Error with resource 'TABLE': 404 Not Found");
 		await expect(airtable.query('TABLE')).rejects.toThrow("Error with resource 'TABLE': 500 Internal error");
@@ -153,7 +154,7 @@ describe('useAirtable find', () => {
 		expect.assertions(1);
 		fetch.resetMocks();
 		fetch.once(JSON.stringify(RECORDS[2]));
-		const result = await airtable.find<Person>('TABLE', 'ID_3');
+		const result = await airtable.find<Person>('TABLE', 'ID_3', {});
 		expect(result.name).toBe('Johnny Doe');
 	});
 });

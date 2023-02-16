@@ -7,7 +7,7 @@
   "browser": "dist/index.umd.js",
   "scripts": {
     "test": "jest --coverage",
-    "build": "tsc",
+    "build": "npm run test && tsc",
     "prepare": "npm run build"
   },
   "repository": {
@@ -23,11 +23,14 @@
   "author": "Marc Vilella",
   "license": "MIT",
   "devDependencies": {
+    "@types/jest": "^29.4.0",
     "eslint": "^7.30.0",
     "eslint-config-airbnb": "^18.2.1",
-    "eslint-plugin-jest": "^25.3.0",
-    "jest": "^27.3.1",
+    "eslint-plugin-jest": "^27.2.1",
+    "jest": "^29.4.3",
     "jest-fetch-mock": "^3.0.3",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
   },
   "files": [
