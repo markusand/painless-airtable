@@ -50,8 +50,9 @@ export default ({ base, token, baseURL = BASE_URL }: AirtableOptions) => {
 	const find: AirtableFind = async <T extends object>(table: string, id: string, options?: AirtableFindOptions) => {
 		if (!table) throw new Error('Airtable table is required');
 		if (!id) throw new Error('Airtable record id is required');
-		const record = await query(`${table}/${id}`, options);
-		return flattenRecord(record);
+		const { flatten = true } = options || {};
+		const record = await query(`${table}/${id}`, options) as AirtableRawRecord<T>;
+		return flatten ? flattenRecord(record) : record;
 	};
 
 	return { query, select, find };
