@@ -3,14 +3,9 @@ import useURL from '../use.url';
 const baseURL = 'https://base_url';
 const base = 'base';
 
-const buildURL = useURL({ baseURL, base });
+const buildURL = useURL(baseURL, base);
 
 describe('useURL', () => {
-	it('should return error if resource not provided', () => {
-		expect.assertions(1);
-		expect(() => buildURL()).toThrow('Airtable resource is required');
-	});
-
 	it('should create a basic url without parameters', () => {
 		expect.assertions(1);
 		const url = buildURL('table');

@@ -1,20 +1,31 @@
 /* eslint jest/require-hook: "off" */
 import fetch from 'jest-fetch-mock';
 import useAirtable, { BASE_URL } from '../use.airtable';
+import type { AirtableResponse } from '../types';
 
 fetch.enableMocks();
 
-const RECORDS = [
+type Person = {
+	name: string;
+	kids?: string[];
+	parents?: string[];
+};
+
+type ExpandedPerson = {
+	name: string;
+	kids?: ExpandedPerson[];
+	parents?: ExpandedPerson[];
+};
+
+const RECORDS: AirtableResponse<Person>['records'] = [
 	{ id: 'ID_1', createdTime: '2020-03-25T21:38:30.000Z', fields: { name: 'John Doe', kids: ['ID_3'] } },
 	{ id: 'ID_2', createdTime: '2020-03-25T21:38:40.000Z', fields: { name: 'Jane Doe', kids: ['ID_3'] } },
 	{ id: 'ID_3', createdTime: '2020-03-25T21:38:50.000Z', fields: { name: 'Johnny Doe', parents: ['ID_1', 'ID_2'] } },
 ];
 
 describe('useAirtable initialization', () => {
-	it('should throw error if missing required arguments', () => {
-		expect.assertions(3);
-		expect(() => useAirtable()).toThrow('Airtable base is required');
-		expect(() => useAirtable({ base: 'BASE' })).toThrow('Airtable API token is required');
+	it('should initialize airtable composable', () => {
+		expect.assertions(1);
 		expect(() => useAirtable({ base: 'BASE', token: 'TOKEN' })).toBeTruthy();
 	});
 
@@ -26,12 +37,6 @@ describe('useAirtable initialization', () => {
 });
 
 describe('useAirtable query', () => {
-	it('should throw error if resource not provided', async () => {
-		expect.assertions(1);
-		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
-		await expect(airtable.query()).rejects.toThrow('Airtable resource is required');
-	});
-
 	it('should make a valid query', async () => {
 		expect.assertions(4);
 		fetch.resetMocks();
@@ -41,7 +46,8 @@ describe('useAirtable query', () => {
 		expect(fetch.mock.calls).toHaveLength(1);
 		const [[url, options]] = fetch.mock.calls;
 		expect(url).toBe(`${BASE_URL}/BASE/TABLE`);
-		expect(options.headers.Authorization).toBe('Bearer TOKEN');
+		// @ts-ignore Headers contains Authorization
+		expect(options?.headers?.Authorization).toBe('Bearer TOKEN');
 		expect(result).toStrictEqual({ records: [] });
 	});
 
@@ -49,8 +55,8 @@ describe('useAirtable query', () => {
 		expect.assertions(2);
 		fetch.resetMocks();
 		fetch
-			.once(undefined, { status: 404, statusText: 'Not Found' })
-			.once(undefined, { status: 500, statusText: 'Internal error' });
+			.once('', { status: 404, statusText: 'Not Found' })
+			.once('', { status: 500, statusText: 'Internal error' });
 		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
 		await expect(airtable.query('TABLE')).rejects.toThrow("Error with resource 'TABLE': 404 Not Found");
 		await expect(airtable.query('TABLE')).rejects.toThrow("Error with resource 'TABLE': 500 Internal error");
@@ -59,11 +65,6 @@ describe('useAirtable query', () => {
 
 describe('useAirtable select', () => {
 	const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
-
-	it('should throw error if table not provided', async () => {
-		expect.assertions(1);
-		await expect(airtable.select()).rejects.toThrow('Airtable table is required');
-	});
 
 	it('should return results with default parameters', async () => {
 		expect.assertions(2);
@@ -83,7 +84,7 @@ describe('useAirtable select', () => {
 		expect.assertions(4);
 		fetch.resetMocks();
 		fetch.once(JSON.stringify({ records: RECORDS }));
-		const result = await airtable.select('TABLE', { index: true });
+		const result = await airtable.select<Person>('TABLE', { index: true });
 		expect(Array.isArray(result)).toBe(false);
 		expect(result).toHaveProperty('ID_1');
 		expect(result.ID_1.name).toBe('John Doe');
@@ -97,19 +98,19 @@ describe('useAirtable select', () => {
 			.once(JSON.stringify({ records: RECORDS })) // Return all records
 			.once(JSON.stringify({ records: [RECORDS[2]] })) // Return ID_3
 			.once(JSON.stringify({ records: RECORDS.slice(0, 2) })); // Return ID_1 & ID_2
-		const result = await airtable.select('TABLE', {
+		const result = await airtable.select<ExpandedPerson>('TABLE', {
 			expand: {
 				kids: { table: 'TABLE' },
 				parents: { table: 'TABLE' },
 			},
 		});
 		expect(fetch.mock.calls).toHaveLength(3);
-		expect(result[0].kids[0].name).toBe('Johnny Doe');
-		expect(result[1].kids[0].name).toBe('Johnny Doe');
+		expect(result[0].kids?.[0].name).toBe('Johnny Doe');
+		expect(result[1].kids?.[0].name).toBe('Johnny Doe');
 		expect(result[2].kids).toBeUndefined();
 		expect(result[2].parents).toHaveLength(2);
-		expect(result[2].parents[0].name).toBe('John Doe');
-		expect(result[2].parents[1].name).toBe('Jane Doe');
+		expect(result[2].parents?.[0].name).toBe('John Doe');
+		expect(result[2].parents?.[1].name).toBe('Jane Doe');
 	});
 
 	it('should recursively expand records', async () => {
@@ -119,7 +120,7 @@ describe('useAirtable select', () => {
 			.once(JSON.stringify({ records: [RECORDS[0]] })) // Return ID_1
 			.once(JSON.stringify({ records: [RECORDS[2]] })) // Return ID_3
 			.once(JSON.stringify({ records: RECORDS.slice(0, 2) })); // Return ID_1 & ID_2
-		const result = await airtable.select('TABLE', {
+		const result = await airtable.select<ExpandedPerson>('TABLE', {
 			expand: {
 				kids: {
 					table: 'TABLE',
@@ -128,9 +129,9 @@ describe('useAirtable select', () => {
 			},
 		});
 		expect(fetch.mock.calls).toHaveLength(3);
-		expect(result[0].kids[0].name).toBe('Johnny Doe');
-		expect(result[0].kids[0].parents).toHaveLength(2);
-		expect(result[0].kids[0].parents[0].name).toBe('John Doe');
+		expect(result[0].kids?.[0].name).toBe('Johnny Doe');
+		expect(result[0].kids?.[0].parents).toHaveLength(2);
+		expect(result[0].kids?.[0].parents?.[0].name).toBe('John Doe');
 	});
 
 	it('should persist paginated indexed queries', async () => {
@@ -139,7 +140,7 @@ describe('useAirtable select', () => {
 		fetch
 			.once(JSON.stringify({ records: RECORDS.slice(0, 2), offset: 'ID_3' }))
 			.once(JSON.stringify({ records: [RECORDS[2]] }));
-		const result = await airtable.select('TABLE', { persist: true });
+		const result = await airtable.select<Person>('TABLE', { persist: true });
 		expect(fetch.mock.calls).toHaveLength(2);
 		expect(result).toHaveLength(3);
 		expect(result[2].name).toBe('Johnny Doe');
@@ -149,17 +150,11 @@ describe('useAirtable select', () => {
 describe('useAirtable find', () => {
 	const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
 
-	it('should throw error if table or record id not provided', async () => {
-		expect.assertions(2);
-		await expect(airtable.find()).rejects.toThrow('Airtable table is required');
-		await expect(airtable.find('TABLE')).rejects.toThrow('Airtable record id is required');
-	});
-
 	it('should return expected record', async () => {
 		expect.assertions(1);
 		fetch.resetMocks();
 		fetch.once(JSON.stringify(RECORDS[2]));
-		const result = await airtable.find('TABLE', 'ID_3');
+		const result = await airtable.find<Person>('TABLE', 'ID_3', {});
 		expect(result.name).toBe('Johnny Doe');
 	});
 });

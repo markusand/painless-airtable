@@ -1,12 +1,6 @@
 import createFormula from '../formula';
 
 describe('formula for where clause', () => {
-	it('should return null if no input parameter', () => {
-		expect.assertions(1);
-		const formula = createFormula();
-		expect(formula).toBeNull();
-	});
-
 	it('should return formula if passing a string', () => {
 		expect.assertions(1);
 		const formula = createFormula('OR(name, surname)');
