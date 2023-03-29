@@ -158,3 +158,58 @@ describe('useAirtable find', () => {
 		expect(result.name).toBe('Johnny Doe');
 	});
 });
+
+describe('useAirtable update', () => {
+	const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
+
+	it('should update a record', async () => {
+		expect.assertions(4);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify({ records: [RECORDS[1]] }));
+		const result = await airtable.update<Person>('TABLE', { _id: 'ID_1', name: 'Johann Doe' });
+		const [url, call] = fetch.mock.lastCall || [];
+		expect(url).toBe(`${BASE_URL}/BASE/TABLE`);
+		expect(call?.method).toBe('PATCH');
+		expect(call?.body).toStrictEqual(JSON.stringify({ records: [{ id: 'ID_1', fields: { name: 'Johann Doe' } }] }))
+		expect(Array.isArray(result)).toBe(false);
+	});
+
+	it('should update multiple records', async () => {
+		expect.assertions(2);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify({ records: RECORDS.slice(0, 2) }));
+		const result = await airtable.update<Person>('TABLE', [
+			{ _id: 'ID_1', name: 'Johann Doe' },
+			{ _id: 'ID_2', name: 'Johanna Doe' },
+		]);
+		const [, call] = fetch.mock.lastCall || [];
+		expect(call?.body).toStrictEqual(JSON.stringify({
+			records: [
+				{ id: 'ID_1', fields: { name: 'Johann Doe' } },
+				{ id: 'ID_2', fields: { name: 'Johanna Doe' } },
+			],
+		}))
+		expect(Array.isArray(result)).toBe(true);
+	});
+
+	it('should update record with options', async () => {
+		expect.assertions(1);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify({ records: [RECORDS[1]] }));
+		await airtable.update<Person>('TABLE', { name: 'John Doe', kids: [] }, {
+			typecast: true,
+			findBy: ['name'],
+		});
+		const [, call] = fetch.mock.lastCall || [];
+		expect(call?.body).toStrictEqual(JSON.stringify({
+			records: [{ fields: { name: 'John Doe', kids:[] } }],
+			typecast: true,
+			performUpsert: { fieldsToMergeOn: ['name'] }
+		}));
+	});
+
+	it('should throw error if record id and findBy are not provided', async () => {
+		expect.assertions(1);
+		await expect(airtable.update<Person>('TABLE', {})).rejects.toThrow('Record id or findBy is required');
+	});
+});

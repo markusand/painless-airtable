@@ -29,6 +29,11 @@ export type AirtableExpandOptions = Record<string, {
 
 export type AirtableFindOptions = Pick<AirtableSelectOptions, 'base' | 'view' | 'fields' | 'expand' | 'flatten'>;
 
+export type AirtableUpdateOptions = {
+	typecast?: boolean;
+	findBy?: string[], 
+};
+
 export type AirtableRawRecord<T> = {
 	id: string;
 	createdTime: string;
@@ -55,4 +60,9 @@ export interface AirtableSelect {
 export interface AirtableFind {
 	<T>(table: string, id: string, options?: AirtableFindOptions & { flatten: false }): Promise<AirtableRawRecord<T>>;
 	<T>(table: string, id: string, options?: AirtableFindOptions): Promise<AirtableRecord<T>>;
+};
+
+export interface AirtableUpdate {
+	<T>(table: string, data: Partial<AirtableRecord<T>>, options?: AirtableUpdateOptions): Promise<AirtableRecord<T>>;
+	<T>(table: string, data: Partial<AirtableRecord<T>>[], options?: AirtableUpdateOptions): Promise<AirtableRecord<T>[]>;
 };

@@ -1,7 +1,24 @@
 import HttpError from './error.http';
 import useURL from './use.url';
 import { flattenRecord, expandRecords, indexateRecords } from './use.records';
-import type { AirtableOptions, AirtableSelectOptions, AirtableFindOptions, AirtableResponse, AirtableRawRecord, AirtableSelect, AirtableFind } from './types';
+import { toArray } from './utils';
+import type {
+	AirtableOptions,
+	AirtableSelectOptions,
+	AirtableFindOptions,
+	AirtableUpdateOptions,
+	AirtableResponse,
+	AirtableRecord,
+	AirtableRawRecord,
+	AirtableSelect,
+	AirtableFind,
+	AirtableUpdate,
+} from './types';
+
+type AirtableQueryOptions = {
+	_method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+	_data?: string;
+} & AirtableSelectOptions;
 
 export const BASE_URL = 'https://api.airtable.com/v0';
 
@@ -11,11 +28,15 @@ export default ({ base, token, baseURL = BASE_URL }: AirtableOptions) => {
 
 	const buildURL = useURL(baseURL, base);
 
-	const query = async <T>(resource: string, options?: AirtableSelectOptions) => {
+	const query = async (resource: string, options?: AirtableQueryOptions) => {
 		if (!resource) throw new Error('Airtable resource is required');
 		const url = buildURL(resource, options);
-		const headers = { Authorization: `Bearer ${token}` };
-		const response = await fetch(url, { headers });
+		const { _method: method = 'GET', _data: body } = options || {};
+		const headers = {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`
+		};
+		const response = await fetch(url, { method, headers, body });
 		const { status, statusText } = response;
 		if (HttpError.isErrorCode(status)) {
 			const errorMessage = `Error with resource '${resource}': ${status} ${statusText}`;
@@ -55,5 +76,22 @@ export default ({ base, token, baseURL = BASE_URL }: AirtableOptions) => {
 		return flatten ? flattenRecord(record) : record;
 	};
 
-	return { query, select, find };
+	const update: AirtableUpdate = async <T>(
+		table: string,
+		data: Partial<AirtableRecord<T>>[] | Partial<AirtableRecord<T>>,
+		options?: AirtableUpdateOptions
+	) => {
+		const { typecast, findBy } = options || {};
+		const performUpsert = findBy ? { fieldsToMergeOn: findBy } : undefined;
+		const records = toArray(data).map(({ _id: id, _created, ...fields }) => ({ id, fields }));
+		if (!findBy && records.some(record => !record.id)) throw new Error('Record id or findBy is required');
+		const response = await query(table, {
+			_method: 'PATCH',
+			_data: JSON.stringify({ records, typecast, performUpsert }),
+		});
+		const flatRecords = response.records.map(flattenRecord) as AirtableRecord<T>[];
+		return Array.isArray(data) ? flatRecords : flatRecords[0];
+	};
+
+	return { query, select, find, update };
 };
