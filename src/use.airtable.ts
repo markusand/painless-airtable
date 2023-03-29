@@ -22,7 +22,7 @@ type AirtableQueryOptions = {
 
 export const BASE_URL = 'https://api.airtable.com/v0';
 
-export default ({ base, token, baseURL = BASE_URL }: AirtableOptions) => {
+export default ({ base, token, baseURL = BASE_URL, fetchOptions: globalFetchOptions }: AirtableOptions) => {
 	if (!base) throw new Error('Airtable base is required');
 	if (!token) throw new Error('Airtable API token is required');
 
@@ -31,12 +31,16 @@ export default ({ base, token, baseURL = BASE_URL }: AirtableOptions) => {
 	const query = async (resource: string, options?: AirtableQueryOptions) => {
 		if (!resource) throw new Error('Airtable resource is required');
 		const url = buildURL(resource, options);
-		const { _method: method = 'GET', _data: body } = options || {};
+		const {
+			_method: method = 'GET',
+			_data: body,
+			fetchOptions = globalFetchOptions
+		} = options || {};
 		const headers = {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${token}`
 		};
-		const response = await fetch(url, { method, headers, body });
+		const response = await fetch(url, { method, headers, body, ...fetchOptions });
 		const { status, statusText } = response;
 		if (HttpError.isErrorCode(status)) {
 			const errorMessage = `Error with resource '${resource}': ${status} ${statusText}`;
@@ -81,13 +85,14 @@ export default ({ base, token, baseURL = BASE_URL }: AirtableOptions) => {
 		data: Partial<AirtableRecord<T>>[] | Partial<AirtableRecord<T>>,
 		options?: AirtableUpdateOptions
 	) => {
-		const { typecast, findBy } = options || {};
+		const { typecast, findBy, fetchOptions } = options || {};
 		const performUpsert = findBy ? { fieldsToMergeOn: findBy } : undefined;
 		const records = toArray(data).map(({ _id: id, _created, ...fields }) => ({ id, fields }));
 		if (!findBy && records.some(record => !record.id)) throw new Error('Record id or findBy is required');
 		const response = await query(table, {
 			_method: 'PATCH',
 			_data: JSON.stringify({ records, typecast, performUpsert }),
+			fetchOptions,
 		});
 		const flatRecords = response.records.map(flattenRecord) as AirtableRecord<T>[];
 		return Array.isArray(data) ? flatRecords : flatRecords[0];

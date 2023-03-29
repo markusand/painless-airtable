@@ -6,6 +6,7 @@ export type AirtableOptions = {
 	base: string;
 	token: string;
 	baseURL?: string;
+	fetchOptions?: Record<string, any>;
 };
 
 export type AirtableSelectOptions = {
@@ -20,6 +21,7 @@ export type AirtableSelectOptions = {
 	where?: AirtableWhere;
 	expand?: AirtableExpandOptions;
 	flatten?: boolean;
+	fetchOptions?: Record<string, any>;
 };
 
 export type AirtableExpandOptions = Record<string, {
@@ -27,11 +29,12 @@ export type AirtableExpandOptions = Record<string, {
 	options?: AirtableSelectOptions;
 }>;
 
-export type AirtableFindOptions = Pick<AirtableSelectOptions, 'base' | 'view' | 'fields' | 'expand' | 'flatten'>;
+export type AirtableFindOptions = Pick<AirtableSelectOptions, 'base' | 'view' | 'fields' | 'expand' | 'flatten' | 'fetchOptions'>;
 
 export type AirtableUpdateOptions = {
 	typecast?: boolean;
-	findBy?: string[], 
+	findBy?: string[],
+	fetchOptions?: Record<string, any>;
 };
 
 export type AirtableRawRecord<T> = {

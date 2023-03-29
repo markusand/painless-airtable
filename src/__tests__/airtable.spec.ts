@@ -61,10 +61,45 @@ describe('useAirtable query', () => {
 		await expect(airtable.query('TABLE')).rejects.toThrow("Error with resource 'TABLE': 404 Not Found");
 		await expect(airtable.query('TABLE')).rejects.toThrow("Error with resource 'TABLE': 500 Internal error");
 	});
+
+	it('should add extra fetch options', async () => {
+		expect.assertions(1);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify({ records: [] }));
+		const airtable = useAirtable({
+			base: 'BASE',
+			token: 'TOKEN',
+			fetchOptions: { key: 'value' },
+		});
+		await airtable.query('TABLE');
+		const [[, options]] = fetch.mock.calls;
+		expect(options).toHaveProperty('key', 'value');
+	});
 });
 
 describe('useAirtable select', () => {
 	const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
+
+	it('should add local extra fetch options', async () => {
+		expect.assertions(1);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify({ records: RECORDS }));
+		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
+		await airtable.select('TABLE', { fetchOptions: { key: 'value' } });
+		const [[, options]] = fetch.mock.calls;
+		expect(options).toHaveProperty('key', 'value');
+	});
+
+	it('should override extra fetch options', async () => {
+		expect.assertions(2);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify({ records: RECORDS }));
+		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN', fetchOptions: { key: 'value' } });
+		await airtable.select('TABLE', { fetchOptions: { foo: 'bar' } });
+		const [[, options]] = fetch.mock.calls;
+		expect(options).toHaveProperty('foo', 'bar');
+		expect(options).not.toHaveProperty('key', 'value');
+	});
 
 	it('should return results with default parameters', async () => {
 		expect.assertions(2);
@@ -157,10 +192,30 @@ describe('useAirtable find', () => {
 		const result = await airtable.find<Person>('TABLE', 'ID_3', {});
 		expect(result.name).toBe('Johnny Doe');
 	});
+
+	it('should add local extra fetch options', async () => {
+		expect.assertions(1);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify(RECORDS[2]));
+		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
+		await airtable.find('TABLE', 'ID_3', { fetchOptions: { key: 'value' } });
+		const [[, options]] = fetch.mock.calls;
+		expect(options).toHaveProperty('key', 'value');
+	});
 });
 
 describe('useAirtable update', () => {
 	const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
+
+	it('should override extra fetch options', async () => {
+		expect.assertions(1);
+		fetch.resetMocks();
+		fetch.once(JSON.stringify({ records: [RECORDS[1]] }));
+		const airtable = useAirtable({ base: 'BASE', token: 'TOKEN' });
+		const result = await airtable.update<Person>('TABLE', { _id: 'ID_1' }, { fetchOptions: { key: 'value' } });
+		const [[, options]] = fetch.mock.calls;
+		expect(options).toHaveProperty('key', 'value');
+	});
 
 	it('should update a record', async () => {
 		expect.assertions(4);
