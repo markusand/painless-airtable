@@ -1,6 +1,6 @@
 {
   "name": "painless-airtable",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Easily interact with the Airtable API",
   "main": "dist/index.js",
   "module": "dist/index.js",
