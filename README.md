@@ -30,18 +30,13 @@ const results = await airtable.select('users', {
 });
 ```
 
-If you are not working with a bundler, you can also load the module from a CDN such as [unpkg](https://unpkg.com/painless-airtable) and initialize it with the convenient `init` method.
+### Select & find records
 
-```js
-const airtable = painlessairtable.init({
-  base: '<< Airtable base ID >>',
-  token: '<< Airtable API token >>',
-});
-```
+Use `select` method to retrieve all records that match certain conditions (if any), while `find` method will retrieve a single record by its Airtable's RECORD_ID.
 
-## Options
+#### Options
 
-`select` and `find` methods accept some options to tailor the response from Airtable. If not provided the results will be as is with Airtable's default options.
+Both methods accept some options to tailor the response from Airtable. If not provided the results will be as is with Airtable's default options.
 
 |option|type|default|description|
 |---|---|---|---|
@@ -56,7 +51,7 @@ const airtable = painlessairtable.init({
 |expand|object|undefined|Options to expand linked records|
 |flatten|boolean|true|Flatten records, assigning metadata to underscore fields|
 
-### where
+#### Filter records with `where`
 
 Results may be filtered using an object parameter, with some *mongodb-like* operands.
 
@@ -88,7 +83,7 @@ where: {
 
 For more complex filtering you may have to write your own  [filterByFormula string](https://support.airtable.com/hc/en-us/articles/223247187-How-do-I-sort-filter-or-retrieve-ordered-records-in-the-API-) and pass it directly.
 
-### expand
+#### Expand records
 
 Automatically query and populate fields with linked records information.
 > [!] Be aware it may trigger the max-query-per-second limit error.
@@ -106,6 +101,10 @@ expand: {
   },
 }
 ```
+
+### Update records
+
+Use `update` method to update a record by passing a single record or an array (up to 10 limited by Airtable). Update records according to some other attribute than `_id` by using the `findBy` option. Use `typecast` option to force Airtable to infer the type of the field.
 
 ## To Do
 
