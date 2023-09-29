@@ -4,9 +4,9 @@ import { flattenRecord, expandRecords, indexateRecords } from './use.records';
 import { toArray } from './utils';
 import type {
 	AirtableOptions,
-	AirtableSelectOptions,
-	AirtableFindOptions,
-	AirtableUpdateOptions,
+	SelectOptions,
+	FindOptions,
+	UpdateOptions,
 	AirtableResponse,
 	AirtableRecord,
 	AirtableRawRecord,
@@ -18,7 +18,7 @@ import type {
 type AirtableQueryOptions = {
 	_method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 	_data?: string;
-} & AirtableSelectOptions;
+} & SelectOptions;
 
 export const BASE_URL = 'https://api.airtable.com/v0';
 
@@ -50,7 +50,7 @@ export default ({ base, token, baseURL = BASE_URL, fetchOptions: globalFetchOpti
 	};
 
 	// @ts-ignore Return type inference is correct on use, but this triggers a ts error
-	const select: AirtableSelect = async <T extends object>(table: string, options?: AirtableSelectOptions) => {
+	const select: AirtableSelect = async <T extends object>(table: string, options?: SelectOptions) => {
 		if (!table) throw new Error('Airtable table is required');
 		const { persist, expand, index, flatten = true } = options || {};
 		const { records, offset } = await query(table, options) as AirtableResponse<T>;
@@ -72,7 +72,7 @@ export default ({ base, token, baseURL = BASE_URL, fetchOptions: globalFetchOpti
 		 return index ? indexateRecords(flatRecords) : flatRecords;
 	};
 
-	const find: AirtableFind = async <T extends object>(table: string, id: string, options?: AirtableFindOptions) => {
+	const find: AirtableFind = async <T extends object>(table: string, id: string, options?: FindOptions) => {
 		if (!table) throw new Error('Airtable table is required');
 		if (!id) throw new Error('Airtable record id is required');
 		const { flatten = true } = options || {};
@@ -83,7 +83,7 @@ export default ({ base, token, baseURL = BASE_URL, fetchOptions: globalFetchOpti
 	const update: AirtableUpdate = async <T extends object>(
 		table: string,
 		data: Partial<AirtableRecord<T>>[] | Partial<AirtableRecord<T>>,
-		options?: AirtableUpdateOptions
+		options?: UpdateOptions
 	) => {
 		const { typecast, findBy, fetchOptions } = options || {};
 		const performUpsert = findBy ? { fieldsToMergeOn: findBy } : undefined;

@@ -1,4 +1,4 @@
-import type { AirtableRawRecord, AirtableRecord, AirtableExpandOptions, AirtableSelect } from './types';
+import type { AirtableRawRecord, AirtableRecord, ExpandOptions, AirtableSelect } from './types';
 
 export const flattenRecord = <T extends object>(record: AirtableRawRecord<T>): AirtableRecord<T> => ({
 	_id: record.id,
@@ -16,7 +16,7 @@ export const indexateRecords = <T extends object>(records: (AirtableRawRecord<T>
 
 export const expandRecords = async <T extends object>(
 	records: AirtableRawRecord<T>[],
-	expand: AirtableExpandOptions,
+	expand: ExpandOptions,
 	select: AirtableSelect,
 ) => {
 	// Recollect all unique record IDs for each field and query them to the API

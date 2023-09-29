@@ -1,7 +1,7 @@
 import createFormula from './formula';
-import { AirtableSelectOptions } from './types';
+import { SelectOptions } from './types';
 
-export default (baseURL: string, base: string) => (resource: string, options?: AirtableSelectOptions): string => {
+export default (baseURL: string, base: string) => (resource: string, options?: SelectOptions): string => {
 	if (!resource) throw new Error('Airtable resource is required');
 	const { base: overrideBase, fields = [], sort = {}, max, view, offset, where } = options || {};
 	const url = new URL(`${baseURL}/${overrideBase || base}/${resource}`);

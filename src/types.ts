@@ -1,6 +1,6 @@
-export type AirtableWhereOperands = 'is' | 'has' | 'not' | 'checked' | '$eq' | '$neq' | '$lt' | '$gt' | '$lte' | '$gte';
-export type AirtableWhereValues = string | number | boolean | Partial<Record<AirtableWhereOperands, string | number | boolean | (number | string | Partial<Record<AirtableWhereOperands, number | string | boolean>>)[]>> | AirtableWhereValues[];
-export type AirtableWhere = string | Record<string, AirtableWhereValues>;
+export type WhereOperands = 'is' | 'has' | 'not' | 'checked' | '$eq' | '$neq' | '$lt' | '$gt' | '$lte' | '$gte';
+export type WhereValues = string | number | boolean | Partial<Record<WhereOperands, string | number | boolean | (number | string | Partial<Record<WhereOperands, number | string | boolean>>)[]>> | WhereValues[];
+export type WhereOptions = string | Record<string, WhereValues>;
 
 export type AirtableOptions = {
 	base: string;
@@ -9,7 +9,7 @@ export type AirtableOptions = {
 	fetchOptions?: Record<string, any>;
 };
 
-export type AirtableSelectOptions = {
+export type SelectOptions = {
 	base?: string;
 	view?: string;
 	fields?: string[];
@@ -18,20 +18,20 @@ export type AirtableSelectOptions = {
 	offset?: string;
 	persist?: boolean;
 	index?: boolean;
-	where?: AirtableWhere;
-	expand?: AirtableExpandOptions;
+	where?: WhereOptions;
+	expand?: ExpandOptions;
 	flatten?: boolean;
 	fetchOptions?: Record<string, any>;
 };
 
-export type AirtableExpandOptions = Record<string, {
+export type ExpandOptions = Record<string, {
 	table: string;
-	options?: AirtableSelectOptions;
+	options?: SelectOptions;
 }>;
 
-export type AirtableFindOptions = Pick<AirtableSelectOptions, 'base' | 'view' | 'fields' | 'expand' | 'flatten' | 'fetchOptions'>;
+export type FindOptions = Pick<SelectOptions, 'base' | 'view' | 'expand' | 'flatten' | 'fetchOptions'>;
 
-export type AirtableUpdateOptions = {
+export type UpdateOptions = {
 	typecast?: boolean;
 	findBy?: string[],
 	fetchOptions?: Record<string, any>;
@@ -54,18 +54,18 @@ export type AirtableRecord<T extends object> = {
 } & T;
 
 export interface AirtableSelect {
-	<T extends object>(table: string, options?: AirtableSelectOptions & { flatten: false, index: true }): Promise<Record<string, AirtableRawRecord<T>>>;
-	<T extends object>(table: string, options?: AirtableSelectOptions & { index: true }): Promise<Record<string, AirtableRecord<T>>>;
-	<T extends object>(table: string, options?: AirtableSelectOptions & { flatten: false }): Promise<AirtableRawRecord<T>[]>;
-	<T extends object>(table: string, options?: AirtableSelectOptions): Promise<AirtableRecord<T>[]>;
+	<T extends object, O extends SelectOptions & { flatten: false, index: true }>(table: string, options?: O): Promise<Record<string, AirtableRawRecord<T>>>;
+	<T extends object, O extends SelectOptions & { index: true }>(table: string, options?: O): Promise<Record<string, AirtableRecord<T>>>;
+	<T extends object, O extends SelectOptions & { flatten: false }>(table: string, options?: O): Promise<AirtableRawRecord<T>[]>;
+	<T extends object>(table: string, options?: SelectOptions): Promise<AirtableRecord<T>[]>;
 };
 
 export interface AirtableFind {
-	<T extends object>(table: string, id: string, options?: AirtableFindOptions & { flatten: false }): Promise<AirtableRawRecord<T>>;
-	<T extends object>(table: string, id: string, options?: AirtableFindOptions): Promise<AirtableRecord<T>>;
+	<T extends object, O extends FindOptions>(table: string, id: string, options?: O & { flatten: false }): Promise<AirtableRawRecord<T>>;
+	<T extends object, O extends FindOptions>(table: string, id: string, options?: O): Promise<AirtableRecord<T>>;
 };
 
 export interface AirtableUpdate {
-	<T extends object>(table: string, data: Partial<AirtableRecord<T>>, options?: AirtableUpdateOptions): Promise<AirtableRecord<T>>;
-	<T extends object>(table: string, data: Partial<AirtableRecord<T>>[], options?: AirtableUpdateOptions): Promise<AirtableRecord<T>[]>;
+	<T extends object>(table: string, data: Partial<AirtableRecord<T>>, options?: UpdateOptions): Promise<AirtableRecord<T>>;
+	<T extends object>(table: string, data: Partial<AirtableRecord<T>>[], options?: UpdateOptions): Promise<AirtableRecord<T>[]>;
 };
