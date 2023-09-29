@@ -37,35 +37,35 @@ export type AirtableUpdateOptions = {
 	fetchOptions?: Record<string, any>;
 };
 
-export type AirtableRawRecord<T> = {
+export type AirtableRawRecord<T extends object> = {
 	id: string;
 	createdTime: string;
 	fields: T;
 };
 
-export type AirtableResponse<T> = {
+export type AirtableResponse<T extends object> = {
 	records: AirtableRawRecord<T>[];
 	offset?: string;
 };
 
-export type AirtableRecord<T> = {
+export type AirtableRecord<T extends object> = {
 	_id: string;
 	_created: string;
 } & T;
 
 export interface AirtableSelect {
-	<T>(table: string, options?: AirtableSelectOptions & { flatten: false, index: true }): Promise<Record<string, AirtableRawRecord<T>>>;
-	<T>(table: string, options?: AirtableSelectOptions & { index: true }): Promise<Record<string, AirtableRecord<T>>>;
-	<T>(table: string, options?: AirtableSelectOptions & { flatten: false }): Promise<AirtableRawRecord<T>[]>;
-	<T>(table: string, options?: AirtableSelectOptions): Promise<AirtableRecord<T>[]>;
+	<T extends object>(table: string, options?: AirtableSelectOptions & { flatten: false, index: true }): Promise<Record<string, AirtableRawRecord<T>>>;
+	<T extends object>(table: string, options?: AirtableSelectOptions & { index: true }): Promise<Record<string, AirtableRecord<T>>>;
+	<T extends object>(table: string, options?: AirtableSelectOptions & { flatten: false }): Promise<AirtableRawRecord<T>[]>;
+	<T extends object>(table: string, options?: AirtableSelectOptions): Promise<AirtableRecord<T>[]>;
 };
 
 export interface AirtableFind {
-	<T>(table: string, id: string, options?: AirtableFindOptions & { flatten: false }): Promise<AirtableRawRecord<T>>;
-	<T>(table: string, id: string, options?: AirtableFindOptions): Promise<AirtableRecord<T>>;
+	<T extends object>(table: string, id: string, options?: AirtableFindOptions & { flatten: false }): Promise<AirtableRawRecord<T>>;
+	<T extends object>(table: string, id: string, options?: AirtableFindOptions): Promise<AirtableRecord<T>>;
 };
 
 export interface AirtableUpdate {
-	<T>(table: string, data: Partial<AirtableRecord<T>>, options?: AirtableUpdateOptions): Promise<AirtableRecord<T>>;
-	<T>(table: string, data: Partial<AirtableRecord<T>>[], options?: AirtableUpdateOptions): Promise<AirtableRecord<T>[]>;
+	<T extends object>(table: string, data: Partial<AirtableRecord<T>>, options?: AirtableUpdateOptions): Promise<AirtableRecord<T>>;
+	<T extends object>(table: string, data: Partial<AirtableRecord<T>>[], options?: AirtableUpdateOptions): Promise<AirtableRecord<T>[]>;
 };

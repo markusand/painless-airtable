@@ -1,12 +1,12 @@
 import type { AirtableRawRecord, AirtableRecord, AirtableExpandOptions, AirtableSelect } from './types';
 
-export const flattenRecord = <T>(record: AirtableRawRecord<T>): AirtableRecord<T> => ({
+export const flattenRecord = <T extends object>(record: AirtableRawRecord<T>): AirtableRecord<T> => ({
 	_id: record.id,
 	_created: record.createdTime,
 	...record.fields,
 });
 
-export const indexateRecords = <T>(records: (AirtableRawRecord<T> | AirtableRecord<T>)[]) => (
+export const indexateRecords = <T extends object>(records: (AirtableRawRecord<T> | AirtableRecord<T>)[]) => (
 	records.reduce((acc, record) => {
 		const id = '_id' in record ? record._id : record.id;
 		acc[id] = record;

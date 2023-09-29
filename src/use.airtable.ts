@@ -80,7 +80,7 @@ export default ({ base, token, baseURL = BASE_URL, fetchOptions: globalFetchOpti
 		return flatten ? flattenRecord(record) : record;
 	};
 
-	const update: AirtableUpdate = async <T>(
+	const update: AirtableUpdate = async <T extends object>(
 		table: string,
 		data: Partial<AirtableRecord<T>>[] | Partial<AirtableRecord<T>>,
 		options?: AirtableUpdateOptions
