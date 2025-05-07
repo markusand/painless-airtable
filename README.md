@@ -86,7 +86,8 @@ For more complex filtering you may have to write your own  [filterByFormula stri
 #### Expand records
 
 Automatically query and populate fields with linked records information.
-> [!] Be aware it may trigger the max-query-per-second limit error.
+> [!WARNING]
+> Be aware it may trigger the max-query-per-second limit error.
 
 ```js
 expand: {
